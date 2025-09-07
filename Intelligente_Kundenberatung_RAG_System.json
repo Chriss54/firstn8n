@@ -1,0 +1,655 @@
+{
+  "name": "Intelligente Kundenberatung RAG System",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Kostenlose Fachberatung anfragen",
+        "formDescription": "Lassen Sie sich von unserem KI-gestützten Expertensystem beraten. Füllen Sie das Formular aus und erhalten Sie innerhalb weniger Minuten eine detaillierte Antwort.",
+        "responseMode": "lastNode",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Vollständiger Name",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "Vor- und Nachname eingeben"
+            },
+            {
+              "fieldLabel": "E-Mail-Adresse",
+              "fieldType": "email",
+              "requiredField": true,
+              "placeholder": "ihre@email-adresse.de"
+            },
+            {
+              "fieldLabel": "Unternehmen",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "Firmenname (optional)"
+            },
+            {
+              "fieldLabel": "Telefonnummer",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "+49 xxx xxx xxxx (optional)"
+            },
+            {
+              "fieldLabel": "Interessensbereich",
+              "fieldType": "select",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Technische Beratung"
+                  },
+                  {
+                    "option": "Produktauswahl"
+                  },
+                  {
+                    "option": "Preisanfrage"
+                  },
+                  {
+                    "option": "Support & Wartung"
+                  },
+                  {
+                    "option": "Sonstige Anfrage"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Detaillierte Anfrage",
+              "fieldType": "textarea",
+              "requiredField": true,
+              "placeholder": "Beschreiben Sie Ihre Frage oder Ihr Anliegen so detailliert wie möglich..."
+            },
+            {
+              "fieldLabel": "Kontaktpräferenz",
+              "fieldType": "select",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "E-Mail bevorzugt"
+                  },
+                  {
+                    "option": "Telefon bevorzugt"
+                  },
+                  {
+                    "option": "Beide Kanäle"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+      "name": "Kundenberatungsformular",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        120,
+        80
+      ],
+      "webhookId": "beratung-anfrage-2024-form",
+      "notes": "Umfassendes Eingabeformular für Kundendaten und Beratungsanfragen"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Eingabedaten validieren und strukturieren\nconst inputData = $input.first().json;\n\n// Zeitstempel und eindeutige ID generieren\nconst anfrage_id = 'BER-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();\nconst zeitstempel = new Date().toLocaleString('de-DE', {\n  timeZone: 'Europe/Berlin',\n  year: 'numeric',\n  month: '2-digit', \n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit'\n});\n\n// Priorität basierend auf Interessensbereich bestimmen\nlet prioritaet = 'Normal';\nif (inputData['Interessensbereich'] === 'Preisanfrage') prioritaet = 'Hoch';\nif (inputData['Interessensbereich'] === 'Technische Beratung') prioritaet = 'Sehr Hoch';\n\n// E-Mail Validierung\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nconst istGueltigeEmail = emailRegex.test(inputData['E-Mail-Adresse']);\n\n// Name Validierung\nconst istGueltigerName = inputData['Vollständiger Name'] && inputData['Vollständiger Name'].length >= 2;\n\nif (!istGueltigeEmail || !istGueltigerName) {\n  return [{\n    json: {\n      fehler: true,\n      fehlergrund: !istGueltigeEmail ? 'Ungültige E-Mail-Adresse' : 'Name zu kurz',\n      eingabedaten: inputData\n    }\n  }];\n}\n\n// Strukturierte Ausgabe\nreturn [{\n  json: {\n    anfrage_id: anfrage_id,\n    zeitstempel: zeitstempel,\n    prioritaet: prioritaet,\n    kundendaten: {\n      vollstaendiger_name: inputData['Vollständiger Name'],\n      email_adresse: inputData['E-Mail-Adresse'],\n      unternehmen: inputData['Unternehmen'] || 'Nicht angegeben',\n      telefonnummer: inputData['Telefonnummer'] || 'Nicht angegeben',\n      kontaktpraeferenz: inputData['Kontaktpräferenz']\n    },\n    anfrage_details: {\n      interessensbereich: inputData['Interessensbereich'],\n      detaillierte_anfrage: inputData['Detaillierte Anfrage'],\n      ursprungsformular: 'Kundenberatungsformular'\n    },\n    verarbeitung_status: 'Eingegangen',\n    fehler: false\n  }\n}];"
+      },
+      "id": "b2c3d4e5-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
+      "name": "Kundendaten Strukturierung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        80
+      ],
+      "notes": "Validierung und Aufbereitung der Kundeneingaben mit Prioritätszuweisung"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "validation_check",
+              "leftValue": "={{ $json.fehler }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
+      "name": "Eingabe Validierung",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        80
+      ],
+      "notes": "Überprüfung der Datenvalidierung - bei Fehlern wird Fehlerbehandlung aktiviert"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error_notification",
+              "name": "fehler_benachrichtigung",
+              "value": "Validierungsfehler bei Kundenanfrage",
+              "type": "string"
+            },
+            {
+              "id": "admin_email",
+              "name": "admin_email_adresse",
+              "value": "admin@unternehmen.de",
+              "type": "string"
+            },
+            {
+              "id": "error_details",
+              "name": "fehler_details",
+              "value": "={{ $json.fehlergrund }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d4e5f6g7-8h9i-0j1k-2l3m-n4o5p6q7r8s9",
+      "name": "Fehler Benachrichtigung",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        220
+      ],
+      "notes": "Behandlung von Validierungsfehlern mit Admin-Benachrichtigung"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "kundenanfragen",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "anfrage_id": "={{ $json.anfrage_id }}",
+            "erstellt_am": "={{ $json.zeitstempel }}",
+            "prioritaet": "={{ $json.prioritaet }}",
+            "vollstaendiger_name": "={{ $json.kundendaten.vollstaendiger_name }}",
+            "email_adresse": "={{ $json.kundendaten.email_adresse }}",
+            "unternehmen": "={{ $json.kundendaten.unternehmen }}",
+            "telefonnummer": "={{ $json.kundendaten.telefonnummer }}",
+            "interessensbereich": "={{ $json.anfrage_details.interessensbereich }}",
+            "detaillierte_anfrage": "={{ $json.anfrage_details.detaillierte_anfrage }}",
+            "kontaktpraeferenz": "={{ $json.kundendaten.kontaktpraeferenz }}",
+            "verarbeitung_status": "={{ $json.verarbeitung_status }}",
+            "ki_antwort_bereit": false
+          }
+        },
+        "options": {}
+      },
+      "id": "e5f6g7h8-9i0j-1k2l-3m4n-o5p6q7r8s9t0",
+      "name": "Kundenregistrierung",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        780,
+        80
+      ],
+      "notes": "Speicherung der Kundendaten in der PostgreSQL-Datenbank"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Sie sind ein professioneller deutscher Kundenberater mit jahrelanger Erfahrung. Sie beraten Kunden höflich, kompetent und lösungsorientiert. Ihre Antworten sind:\n\n- Präzise und sachlich korrekt\n- Freundlich und professionell im Ton  \n- Strukturiert und gut lesbar\n- Auf die spezifische Anfrage zugeschnitten\n- Mit konkreten Handlungsempfehlungen\n\nSie haben Zugriff auf umfassende Produktdokumentation und können detaillierte Beratung zu technischen Fragen, Produktauswahl und Anwendungsfällen geben. Beenden Sie Ihre Antwort immer mit einem Angebot für weitere Beratung."
+        }
+      },
+      "id": "f6g7h8i9-0j1k-2l3m-4n5o-p6q7r8s9t0u1",
+      "name": "KI Berater Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1000,
+        80
+      ],
+      "notes": "Deutscher KI-Berater für professionelle Kundenberatung"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 1000,
+          "frequencyPenalty": 0.1
+        }
+      },
+      "id": "g7h8i9j0-1k2l-3m4n-5o6p-q7r8s9t0u1v2",
+      "name": "Deutsche Beratung LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        300
+      ],
+      "notes": "Optimiertes OpenAI-Modell für deutsche Kundenberatung"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20,
+        "sessionIdTemplate": "kunde-{{ $json.kundendaten.email_adresse }}"
+      },
+      "id": "h8i9j0k1-2l3m-4n5o-6p7q-r8s9t0u1v2w3",
+      "name": "Kunden Gesprächsverlauf",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.1,
+      "position": [
+        1220,
+        300
+      ],
+      "notes": "Speicherung der Kundengesprächshistorie pro E-Mail-Adresse"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.1,
+          "maxTokens": 500
+        }
+      },
+      "id": "i9j0k1l2-3m4n-5o6p-7q8r-s9t0u1v2w3x4",
+      "name": "Wissenssuche LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        500
+      ],
+      "notes": "Spezialisiertes Modell für Dokumentenrecherche"
+    },
+    {
+      "parameters": {
+        "tableName": {
+          "__rl": true,
+          "value": "deutsche_produktdokumentation",
+          "mode": "list",
+          "cachedResultName": "deutsche_produktdokumentation"
+        },
+        "options": {
+          "queryName": "suche_produktdokumente",
+          "topK": 8
+        }
+      },
+      "id": "j0k1l2m3-4n5o-6p7q-8r9s-t0u1v2w3x4y5",
+      "name": "Deutsche Wissensdatenbank",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        500
+      ],
+      "notes": "Vector-Datenbank mit deutscher Produktdokumentation"
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-ada-002",
+        "options": {
+          "stripNewLines": true
+        }
+      },
+      "id": "k1l2m3n4-5o6p-7q8r-9s0t-u1v2w3x4y5z6",
+      "name": "Deutsche Text Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        530
+      ],
+      "notes": "OpenAI Embeddings optimiert für deutsche Texte"
+    },
+    {
+      "parameters": {
+        "name": "deutsche_produktberatung",
+        "description": "Durchsucht die umfassende deutsche Produktdokumentation nach relevanten Informationen zu Kundenfragen. Liefert präzise Antworten zu technischen Spezifikationen, Anwendungsfällen und Produktvergleichen."
+      },
+      "id": "l2m3n4o5-6p7q-8r9s-0t1u-v2w3x4y5z6a7",
+      "name": "Produktberatungs Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        80
+      ],
+      "notes": "Vector-Store-Tool für deutsche Produktberatung"
+    },
+    {
+      "parameters": {
+        "jsCode": "// KI-Antwort verarbeiten und E-Mail vorbereiten\nconst anfrageData = $input.first().json;\nconst kiAntwort = $input.last().json.output || $input.last().json.text || 'Antwort nicht verfügbar';\n\n// HTML E-Mail Template erstellen\nconst htmlTemplate = `\n<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Ihre Beratungsanfrage</title>\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; }\n        .container { max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; }\n        .header { background: #2c5aa0; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }\n        .content { padding: 30px; }\n        .response-box { background: #f8f9fa; border-left: 4px solid #2c5aa0; padding: 20px; margin: 20px 0; }\n        .footer { background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #ddd; font-size: 12px; color: #666; }\n        .button { display: inline-block; background: #2c5aa0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 10px 0; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>Ihre Beratungsanfrage</h1>\n            <p>Vielen Dank für Ihr Vertrauen</p>\n        </div>\n        <div class=\"content\">\n            <h2>Sehr geehrte/r ${anfrageData.kundendaten.vollstaendiger_name},</h2>\n            \n            <p>vielen Dank für Ihre Anfrage zum Thema \"<strong>${anfrageData.anfrage_details.interessensbereich}</strong>\". Wir haben Ihre Anfrage sorgfältig geprüft und möchten Ihnen folgende Beratung anbieten:</p>\n            \n            <div class=\"response-box\">\n                <h3>Unsere Beratung für Sie:</h3>\n                <div style=\"white-space: pre-line;\">${kiAntwort}</div>\n            </div>\n            \n            <p><strong>Ihre Anfrage-Details:</strong></p>\n            <ul>\n                <li><strong>Anfrage-ID:</strong> ${anfrageData.anfrage_id}</li>\n                <li><strong>Zeitpunkt:</strong> ${anfrageData.zeitstempel}</li>\n                <li><strong>Priorität:</strong> ${anfrageData.prioritaet}</li>\n                <li><strong>Kontaktpräferenz:</strong> ${anfrageData.kundendaten.kontaktpraeferenz}</li>\n            </ul>\n            \n            <p>Sollten Sie weitere Fragen haben oder eine persönliche Beratung wünschen, kontaktieren Sie uns gerne:</p>\n            \n            <div style=\"text-align: center;\">\n                <a href=\"mailto:beratung@unternehmen.de\" class=\"button\">E-Mail senden</a>\n                <a href=\"tel:+4921112345678\" class=\"button\">Anrufen: +49 211 123 456 78</a>\n            </div>\n        </div>\n        <div class=\"footer\">\n            <p>Diese Antwort wurde von unserem KI-gestützten Beratungssystem erstellt.</p>\n            <p>Unternehmen GmbH | Musterstraße 123 | 40213 Düsseldorf</p>\n        </div>\n    </div>\n</body>\n</html>\n`;\n\n// Rückgabe für E-Mail Versand\nreturn [{\n  json: {\n    an_email: anfrageData.kundendaten.email_adresse,\n    an_name: anfrageData.kundendaten.vollstaendiger_name,\n    betreff: `Ihre Beratungsanfrage - ${anfrageData.anfrage_details.interessensbereich} (${anfrageData.anfrage_id})`,\n    html_inhalt: htmlTemplate,\n    text_inhalt: `Sehr geehrte/r ${anfrageData.kundendaten.vollstaendiger_name},\\n\\nvielen Dank für Ihre Anfrage zum Thema \"${anfrageData.anfrage_details.interessensbereich}\".\\n\\nUnsere Beratung:\\n${kiAntwort}\\n\\nIhre Anfrage-ID: ${anfrageData.anfrage_id}\\nZeitpunkt: ${anfrageData.zeitstempel}\\n\\nBei weiteren Fragen stehen wir Ihnen gerne zur Verfügung.\\n\\nMit freundlichen Grüßen\\nIhr Beratungsteam`,\n    anfrage_daten: anfrageData,\n    ki_antwort: kiAntwort,\n    email_typ: 'kunden_antwort'\n  }\n}];"
+      },
+      "id": "m3n4o5p6-7q8r-9s0t-1u2v-w3x4y5z6a7b8",
+      "name": "E-Mail Aufbereitung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        80
+      ],
+      "notes": "Generierung des professionellen HTML-E-Mail-Templates mit KI-Antwort"
+    },
+    {
+      "parameters": {
+        "fromEmail": "beratung@unternehmen.de",
+        "toEmail": "={{ $json.an_email }}",
+        "subject": "={{ $json.betreff }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html_inhalt }}",
+        "text": "={{ $json.text_inhalt }}",
+        "options": {
+          "replyTo": "beratung@unternehmen.de"
+        }
+      },
+      "id": "n4o5p6q7-8r9s-0t1u-2v3w-x4y5z6a7b8c9",
+      "name": "Kunden E-Mail Versand",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1660,
+        80
+      ],
+      "notes": "Versendung der personalisierten Beratungs-E-Mail an den Kunden"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "priority_check",
+              "leftValue": "={{ $json.anfrage_daten.prioritaet }}",
+              "rightValue": "Normal",
+              "operator": {
+                "type": "string",
+                "operation": "notEqual",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "o5p6q7r8-9s0t-1u2v-3w4x-y5z6a7b8c9d0",
+      "name": "Prioritäts Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1660,
+        280
+      ],
+      "notes": "Filterung nach hoher Priorität für interne Benachrichtigungen"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Interne Team-Benachrichtigung vorbereiten\nconst emailData = $input.first().json;\nconst anfrageData = emailData.anfrage_daten;\n\n// Prioritäts-basierte Betreffzeile\nlet prioritaetsPrefix = '';\nif (anfrageData.prioritaet === 'Hoch') prioritaetsPrefix = '🟡 HOCH: ';\nif (anfrageData.prioritaet === 'Sehr Hoch') prioritaetsPrefix = '🔴 SEHR HOCH: ';\n\n// Interne E-Mail Template\nconst interneEmailHTML = `\n<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; }\n        .urgent { background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin: 10px 0; }\n        .data-table { border-collapse: collapse; width: 100%; margin: 15px 0; }\n        .data-table th, .data-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n        .data-table th { background: #f2f2f2; }\n        .response-preview { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; }\n    </style>\n</head>\n<body>\n    <h2>${prioritaetsPrefix}Neue Kundenanfrage eingegangen</h2>\n    \n    <div class=\"urgent\">\n        <strong>Sofortige Aktion erforderlich für ${anfrageData.prioritaet}-Priorität Anfrage!</strong>\n    </div>\n    \n    <h3>Kundendaten:</h3>\n    <table class=\"data-table\">\n        <tr><th>Name</th><td>${anfrageData.kundendaten.vollstaendiger_name}</td></tr>\n        <tr><th>E-Mail</th><td><a href=\"mailto:${anfrageData.kundendaten.email_adresse}\">${anfrageData.kundendaten.email_adresse}</a></td></tr>\n        <tr><th>Unternehmen</th><td>${anfrageData.kundendaten.unternehmen}</td></tr>\n        <tr><th>Telefon</th><td><a href=\"tel:${anfrageData.kundendaten.telefonnummer}\">${anfrageData.kundendaten.telefonnummer}</a></td></tr>\n        <tr><th>Kontaktpräferenz</th><td>${anfrageData.kundendaten.kontaktpraeferenz}</td></tr>\n    </table>\n    \n    <h3>Anfrage-Details:</h3>\n    <table class=\"data-table\">\n        <tr><th>Anfrage-ID</th><td>${anfrageData.anfrage_id}</td></tr>\n        <tr><th>Zeitpunkt</th><td>${anfrageData.zeitstempel}</td></tr>\n        <tr><th>Interessensbereich</th><td>${anfrageData.anfrage_details.interessensbereich}</td></tr>\n        <tr><th>Priorität</th><td><strong>${anfrageData.prioritaet}</strong></td></tr>\n    </table>\n    \n    <h3>Kundenanfrage:</h3>\n    <div style=\"background: #f8f9fa; padding: 15px; border-radius: 5px;\">\n        ${anfrageData.anfrage_details.detaillierte_anfrage.replace(/\\n/g, '<br>')}\n    </div>\n    \n    <h3>KI-Antwort Vorschau:</h3>\n    <div class=\"response-preview\">\n        ${emailData.ki_antwort.replace(/\\n/g, '<br>')}\n    </div>\n    \n    <h3>Empfohlene Aktionen:</h3>\n    <ul>\n        <li>📞 <strong>Rückruf</strong> innerhalb von 2 Stunden bei Hoch/Sehr Hoch Priorität</li>\n        <li>📧 <strong>Persönliche Nachfass-E-Mail</strong> mit zusätzlichen Informationen</li>\n        <li>📊 <strong>CRM-Eintrag</strong> erstellen und Lead-Status aktualisieren</li>\n        <li>📝 <strong>Beratungstermin</strong> anbieten bei technischen Anfragen</li>\n    </ul>\n    \n    <p><small>Diese Benachrichtigung wurde automatisch vom Kundenberatungssystem generiert.</small></p>\n</body>\n</html>\n`;\n\nreturn [{\n  json: {\n    team_email: 'vertrieb@unternehmen.de',\n    betreff: `${prioritaetsPrefix}Neue Kundenanfrage - ${anfrageData.anfrage_details.interessensbereich} von ${anfrageData.kundendaten.vollstaendiger_name}`,\n    html_inhalt: interneEmailHTML,\n    prioritaet: anfrageData.prioritaet,\n    anfrage_id: anfrageData.anfrage_id,\n    kunde_email: anfrageData.kundendaten.email_adresse\n  }\n}];"
+      },
+      "id": "p6q7r8s9-0t1u-2v3w-4x5y-z6a7b8c9d0e1",
+      "name": "Team Benachrichtigung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1880,
+        280
+      ],
+      "notes": "Generierung der internen Team-Benachrichtigung für hochpriorisierte Anfragen"
+    },
+    {
+      "parameters": {
+        "fromEmail": "system@unternehmen.de",
+        "toEmail": "={{ $json.team_email }}",
+        "subject": "={{ $json.betreff }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html_inhalt }}",
+        "options": {
+          "cc": "management@unternehmen.de",
+          "replyTo": "vertrieb@unternehmen.de"
+        }
+      },
+      "id": "q7r8s9t0-1u2v-3w4x-5y6z-a7b8c9d0e1f2",
+      "name": "Interne Benachrichtigung",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2100,
+        280
+      ],
+      "notes": "Versendung der Prioritäts-basierten Team-Benachrichtigung"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Kundenberatungsformular": {
+      "main": [
+        [
+          {
+            "node": "Kundendaten Strukturierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundendaten Strukturierung": {
+      "main": [
+        [
+          {
+            "node": "Eingabe Validierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eingabe Validierung": {
+      "main": [
+        [
+          {
+            "node": "Kundenregistrierung",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenregistrierung": {
+      "main": [
+        [
+          {
+            "node": "KI Berater Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KI Berater Agent": {
+      "main": [
+        [
+          {
+            "node": "E-Mail Aufbereitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deutsche Beratung LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "KI Berater Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kunden Gesprächsverlauf": {
+      "ai_memory": [
+        [
+          {
+            "node": "KI Berater Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wissenssuche LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Produktberatungs Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deutsche Wissensdatenbank": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Produktberatungs Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deutsche Text Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Deutsche Wissensdatenbank",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Produktberatungs Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "KI Berater Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail Aufbereitung": {
+      "main": [
+        [
+          {
+            "node": "Kunden E-Mail Versand",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prioritäts Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prioritäts Filter": {
+      "main": [
+        [
+          {
+            "node": "Team Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Team Benachrichtigung": {
+      "main": [
+        [
+          {
+            "node": "Interne Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "timezone": "Europe/Berlin"
+  },
+  "versionId": "beratung-system-v2-2024",
+  "meta": {
+    "instanceId": "deutsche-kundenberatung-rag-system-2024"
+  },
+  "id": "DeutscheKundenberatungRAG2024",
+  "tags": [
+    {
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z",
+      "id": "deutsche-beratung",
+      "name": "Deutsche Kundenberatung"
+    },
+    {
+      "createdAt": "2024-01-15T10:30:00.000Z", 
+      "updatedAt": "2024-01-15T10:30:00.000Z",
+      "id": "lead-generation",
+      "name": "Lead Generation"
+    },
+    {
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z", 
+      "id": "ai-automation",
+      "name": "KI Automation"
+    }
+  ]
+}

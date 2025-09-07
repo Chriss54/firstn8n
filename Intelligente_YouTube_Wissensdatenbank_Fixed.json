@@ -1,0 +1,1187 @@
+{
+  "name": "Intelligente YouTube Wissensdatenbank",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        360
+      ],
+      "id": "cc30e05a-730d-454d-b0d6-2e5137c68d46",
+      "name": "🚀 Deutscher KI Experte",
+      "credentials": {
+        "openRouterApi": {
+          "id": "kjpcuppgDdDLC18x",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1520,
+        540
+      ],
+      "id": "069817cb-7ad7-4d1f-b7cf-8cff86145447",
+      "name": "🧠 Deutsche Embeddings Engine",
+      "credentials": {
+        "openAiApi": {
+          "id": "UkkBac0y6p8xHcrW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Suchanfrage }} bezogen auf {{ $json['Video Titel'] }}",
+        "options": {
+          "systemMessage": "# Deutsche YouTube Wissensassistenz\n\nSie sind ein deutscher KI-Experte mit Zugang zur YouTube Wissensdatenbank, die Transkripte von YouTube-Videos enthält.\n\nWenn der Nutzer eine Frage stellt, durchsuchen Sie die Datenbank mehrfach, um die relevantesten Informationen zu sammeln. Nutzen Sie diese Ergebnisse für eine vollständige und präzise Antwort.\n\nFür jede Tatsache, Erkenntnis oder jedes Zitat fügen Sie explizit den Videotitel, Zeitstempel und die Video-URL hinzu, die alle in den Metadaten verfügbar sind. Verwenden Sie direkte Zitate aus dem Transkript und zitieren Sie immer die Quellen im folgenden Format:\n\n\"zitierter Inhalt\" (Videotitel, 03:12 — Hier ansehen)\n\nFragen Sie iterativ ab, bis Sie genügend Kontext für eine hilfreiche Antwort haben.\n\nKATEGORISIERUNGSSYSTEM:\nOrdnen Sie jede Antwort einer Hauptkategorie zu:\n\n🎯 BUSINESS & STRATEGIE\n🚀 TECHNOLOGIE & INNOVATION  \n📚 BILDUNG & LERNEN\n💡 KREATIVITÄT & DESIGN\n🏃‍♂️ PERSÖNLICHKEITSENTWICKLUNG\n🌟 LIFESTYLE & TRENDS\n\nFormat: [KATEGORIE-EMOJI] KATEGORIE-NAME\n[Antwortinhalt mit Zitaten]\n📊 Zusammenfassung: [Kernaussagen]\n🔗 Quellen: [Anzahl Videos]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        880,
+        200
+      ],
+      "id": "f2983e56-fdff-4959-9bda-f94e21cb31ba",
+      "name": "🎯 Intelligenter Recherche Agent"
+    },
+    {
+      "parameters": {
+        "formTitle": "🎥 YouTube Wissen Abfrage",
+        "formDescription": "Durchsuchen Sie Ihre persönliche YouTube Wissensbibliothek mit präzisen Fragen",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "📹 Video Titel",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "🔍 Suchanfrage",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        120,
+        200
+      ],
+      "id": "5535600e-a39e-4931-8935-a58b44f9fea5",
+      "name": "📋 Wissens-Abfrage Portal",
+      "webhookId": "cbdd6950-0538-4df8-963b-42d634dfd8eb"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die deutsche YouTube Transkript-Datenbank nach spezifischen Video-Inhalten und liefert kategorisierte Antworten.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "videoTitle",
+                "value": "={{ $('📋 Wissens-Abfrage Portal').item.json['📹 Video Titel'] }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        1520,
+        200
+      ],
+      "id": "e856eb76-eef7-4433-b367-ee77a33a5750",
+      "name": "🎯 Spezifische Video-Suche",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sEA7DS8KnjOiIRlz",
+          "name": "NH Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 🎥 INTELLIGENTE YOUTUBE WISSENSDATENBANK\n## 🎯 Kategorisierte Wissensextraktion aus Video-Inhalten\n### 📊 Features: Telegram-Integration • Kategorisierung • Deutsche Antworten\n#### 🔧 Status: Produktionsbereit für Wissensmanagement",
+        "height": 520,
+        "width": 1800,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -80
+      ],
+      "id": "b69fab59-87fc-4767-9e59-ca497796cf66",
+      "name": "🎨 Haupt-System Banner"
+    },
+    {
+      "parameters": {
+        "content": "# 🔍 ERWEITERTE RAG-SUCHE\n## 🚀 Mit Cohere Reranking & TopK=20\n### 📈 Optimiert für höchste Suchqualität\n#### 🇩🇪 Deutsche Sprachoptimierung",
+        "height": 480,
+        "width": 1400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        680
+      ],
+      "id": "e4a7134a-6640-4174-8d13-720e598bdcc9",
+      "name": "🎯 RAG-Optimierung Banner"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die komplette YouTube Transkript-Datenbank mit erweiterten Suchfunktionen und intelligenter Kategorisierung für präzise Antworten.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 20,
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        920
+      ],
+      "id": "7907ed27-806b-4e99-9c0a-d29a204738c6",
+      "name": "🔍 Erweiterte Volltext-Suche",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sEA7DS8KnjOiIRlz",
+          "name": "NH Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        1080
+      ],
+      "id": "d1e7095f-30fe-4422-8ca7-a8e6323708e4",
+      "name": "🧠 Deutsche Volltext-Embeddings",
+      "credentials": {
+        "openAiApi": {
+          "id": "UkkBac0y6p8xHcrW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        880,
+        1120
+      ],
+      "id": "1ef89629-3e87-4b14-976c-1268d31ad435",
+      "name": "🎯 Intelligentes Reranking",
+      "credentials": {
+        "cohereApi": {
+          "id": "5BT0jBZnqD766duT",
+          "name": "CohereApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "# Deutsche YouTube Wissensassistenz\n\nSie sind ein spezialisierter deutscher KI-Assistent mit Zugang zur YouTube Transkript-Datenbank.\n\nWenn Benutzer eine Frage stellen, durchsuchen Sie die Datenbank mehrfach für die relevantesten Informationen. Generieren Sie vollständige und genaue Antworten.\n\nFür jede Tatsache, Erkenntnis oder jedes Zitat zitieren Sie explizit:\n- Videotitel\n- Zeitstempel  \n- Video-URL (alle in Metadaten verfügbar)\n\nVerwenden Sie direkte Transkript-Zitate und zitieren Sie im Format:\n„zitierter Inhalt" (Videotitel, 03:12 — Hier ansehen: http://...)\n\nAntworte IMMER auf Deutsch. Wenn Informationen nicht in der Datenbank verfügbar sind, sage \"Das weiß ich nicht\". Beziehen Sie sich NICHT auf Ihr gelerntes Wissen. Links müssen vollständig ausgeschrieben sein.\n\nKATEGORISIERUNGSSYSTEM:\nOrdnen Sie jede Antwort einer Hauptkategorie zu:\n\n🎯 BUSINESS & STRATEGIE\n- Unternehmensführung, Marketing, Verkauf\n- Geschäftsmodelle, Investitionen\n- Entrepreneurship, Startup-Wissen\n\n🚀 TECHNOLOGIE & INNOVATION  \n- Software-Entwicklung, KI, Automatisierung\n- Tools, Plattformen, Tech-Trends\n- Digitale Transformation\n\n📚 BILDUNG & LERNEN\n- Lernmethoden, Wissensvermittlung\n- Online-Kurse, Tutorials\n- Persönliche Weiterbildung\n\n💡 KREATIVITÄT & DESIGN\n- Content Creation, Design-Prinzipien\n- Kreative Prozesse, Inspiration\n- Kunst, Musik, visuelle Medien\n\n🏃‍♂️ PERSÖNLICHKEITSENTWICKLUNG\n- Produktivität, Zeitmanagement\n- Mindset, Motivation, Gewohnheiten\n- Karriereentwicklung, Leadership\n\n🌟 LIFESTYLE & TRENDS\n- Gesundheit, Fitness, Wellness\n- Reisen, Hobbys, Social Media\n- Aktuelle Trends, Kultur\n\nFormat jeder Antwort:\n[KATEGORIE-EMOJI] KATEGORIE-NAME\n\n[Antwortinhalt mit Zitaten]\n\n📊 Zusammenfassung: [Kurze Kernaussagen]\n🔗 Quellen: [Anzahl verwendeter Videos]\n\nSenden Sie die Antwort an Telegram."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        200,
+        920
+      ],
+      "id": "f2ddcd3f-a91a-4558-9366-cd4932851a2b",
+      "name": "🎓 Kategorisierter Wissens-Agent"
+    },
+    {
+      "parameters": {
+        "formTitle": "📥 YouTube Video Hinzufügen",
+        "formDescription": "Erweitern Sie Ihre Wissensdatenbank um neue YouTube-Videos",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "📹 Video Titel",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "🔗 YouTube URL",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        2000,
+        1600
+      ],
+      "id": "8dd56379-0196-489e-af9c-2d1a5dc5a192",
+      "name": "📥 Video Hinzufügen Portal",
+      "webhookId": "7effd947-0416-4629-8d0c-dd50e21d4c86"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "YOUR_APIFY_API_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "videoUrl",
+              "value": "={{ $json['🔗 YouTube URL'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        1600
+      ],
+      "id": "1f3181ac-4568-4dcf-95bc-c3a14dd7459d",
+      "name": "📝 Transkript-Extraktor"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deutsche Transkript-Verarbeitung - Kombination zu einem String\n\n// Eingabedaten abrufen\nconst inputData = $input.all()[0].json;\n\n// Daten-Array extrahieren\nconst transcriptData = inputData.data;\n\n// Text-Segmente filtern und kombinieren\nconst kombinierterText = transcriptData\n  .filter(item => item.text) // Nur Elemente mit Text-Property\n  .map(item => item.text.trim().replace(/\\\\n/g, ' ')) // Text trimmen und Zeilenumbrüche ersetzen\n  .join(' ') // Mit Leerzeichen verbinden\n  .replace(/\\\\s+/g, ' '); // Mehrfache Leerzeichen durch einfache ersetzen\n\n// Rückgabe als einzelnes Element\nreturn [\n  {\n    json: {\n      kombinierterText: kombinierterText,\n      urspruenglicheAnzahl: transcriptData.length,\n      textSegmentAnzahl: transcriptData.filter(item => item.text).length,\n      verarbeitungsZeit: new Date().toLocaleString('de-DE'),\n      status: 'Erfolgreich verarbeitet'\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2520,
+        1520
+      ],
+      "id": "f2ea08e0-f5b1-4ae0-a629-2bd2d13c4e87",
+      "name": "📋 Deutsche Transkript-Kombination"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deutsche Transkript-Chunking mit Zeitstempeln - Gruppierung in 20er-Blöcke\n\n// Eingabedaten abrufen\nconst inputData = $input.all()[0].json;\n\n// Daten-Array extrahieren und nach Text filtern\nconst transcriptData = inputData.data.filter(item => item.text);\n\n// Gruppierung in 20er-Blöcke\nconst chunkGroesse = 20;\nconst chunks = [];\n\nfor (let i = 0; i < transcriptData.length; i += chunkGroesse) {\n  const chunk = transcriptData.slice(i, i + chunkGroesse);\n  \n  // Text aller Segmente des Chunks kombinieren\n  const kombinierterText = chunk\n    .map(item => item.text.trim())\n    .join(' ');\n  \n  // Zeitstempel-Bereich berechnen\n  const erstesElement = chunk[0];\n  const letztesElement = chunk[chunk.length - 1];\n  \n  const startZeit = parseFloat(erstesElement.start);\n  const endZeit = parseFloat(letztesElement.start) + parseFloat(letztesElement.dur);\n  \n  // Hilfsfunktion für Zeit-Formatierung zu MM:SS\n  const zeitFormatieren = (sekunden) => {\n    if (sekunden < 60) {\n      return `${sekunden.toFixed(3)}s`;\n    }\n    const minuten = Math.floor(sekunden / 60);\n    const restSekunden = sekunden % 60;\n    return `${minuten}:${restSekunden.toFixed(3).padStart(6, '0')}`;\n  };\n  \n  // Deutschen Chunk-Objekt erstellen\n  chunks.push({\n    json: {\n      text: kombinierterText,\n      zeitstempel: {\n        start: startZeit,\n        ende: endZeit,\n        dauer: endZeit - startZeit,\n        startFormatiert: zeitFormatieren(startZeit),\n        endeFormatiert: zeitFormatieren(endZeit),\n        dauerFormatiert: zeitFormatieren(endZeit - startZeit)\n      },\n      elementAnzahl: chunk.length,\n      chunkNummer: Math.floor(i / chunkGroesse) + 1,\n      verarbeitungsStatus: 'Deutsche Segmentierung abgeschlossen'\n    }\n  });\n}\n\n// Alle Chunks als separate Elemente zurückgeben\nreturn chunks;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2520,
+        1760
+      ],
+      "id": "e94a7325-41c4-4d07-81a2-bcb0b388b919",
+      "name": "⏱️ Deutsche Zeitstempel-Segmente"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2760,
+        1600
+      ],
+      "id": "a82ec48d-2045-48bc-8342-13a69d897859",
+      "name": "🔄 Deutsche Daten-Zusammenführung"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1z11UfMdmbfW40g9d0a_JtE4Iuusjrd3kpernEETnWj4",
+          "mode": "list",
+          "cachedResultName": "Deutsche YouTube Videos Verwaltung",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1z11UfMdmbfW40g9d0a_JtE4Iuusjrd3kpernEETnWj4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Haupttabelle",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1z11UfMdmbfW40g9d0a_JtE4Iuusjrd3kpernEETnWj4/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "Status"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        2200
+      ],
+      "id": "91ee085f-7248-4b9d-a1f8-3f3a4efb1bbc",
+      "name": "📊 Deutsche Tabellen-Überwachung",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "4aXf9935H0AnCIcv",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dd6297c2-fadf-440d-aa41-5a3772767cca",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Entfernen",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        2200
+      ],
+      "id": "8b2d1f20-3140-4957-89d6-597483e7ea67",
+      "name": "🗑️ Deutscher Löschung-Filter"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "documents",
+        "filterType": "string",
+        "filterString": "=metadata->>videoURL=like.*{{ $json.url }}"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        2200
+      ],
+      "id": "c243cf60-d5cd-4d73-bd59-f9cef3d17747",
+      "name": "🗑️ Deutsche Video-Entfernung",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "sEA7DS8KnjOiIRlz",
+          "name": "NH Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "12D8zV6sDK3oNGIPCmJlHkW3QBtetejpQtDAXU-XzKS4",
+          "mode": "list",
+          "cachedResultName": "Deutsche YouTube Videos Hauptliste",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12D8zV6sDK3oNGIPCmJlHkW3QBtetejpQtDAXU-XzKS4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Haupttabelle",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ur4YOjXHSG30KZvxZHzHbANO-udaZ5wKzaKlxQiCYAc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "URL": "={{ $('⚙️ Deutsche Feld-Bearbeitung').item.json.url }}",
+            "Status": "Entfernt"
+          },
+          "matchingColumns": [
+            "URL"
+          ],
+          "schema": [
+            {
+              "id": "Titel",
+              "displayName": "Titel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transkript",
+              "displayName": "Transkript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "zeilen_nummer",
+              "displayName": "zeilen_nummer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        3080,
+        2200
+      ],
+      "id": "da002221-67a8-48e8-8602-e527180adeaa",
+      "name": "📝 Deutsche Tabellen-Aktualisierung",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9nrggIIrhCEER4P5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a819cb4c-30ff-4d23-b176-a2d7a77f91e9",
+              "name": "url",
+              "value": "={{ $json.URL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2640,
+        2200
+      ],
+      "id": "27aaf483-cf78-4a39-ab3c-718ad28d521c",
+      "name": "⚙️ Deutsche Feld-Bearbeitung"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2440,
+        2200
+      ],
+      "id": "1ea4014d-1430-4e9f-b423-483e75ae5e7c",
+      "name": "🔄 Deutsche Batch-Verarbeitung"
+    },
+    {
+      "parameters": {
+        "content": "# 🔄 DEUTSCHE TRANSKRIPT-PIPELINE\n## 📝 Apify-Integration • Intelligente Segmentierung • Zeitstempel-Verarbeitung\n### 🇩🇪 Optimiert für deutsche Sprache und Formatierung\n#### 🎯 Features: Chunk-Verarbeitung • Metadaten-Extraktion • Supabase-Integration",
+        "height": 520,
+        "width": 1800,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        1320
+      ],
+      "id": "fccd7601-0b1a-4241-b3e3-446dbc8a46d7",
+      "name": "🔧 Deutsche Pipeline-Banner"
+    },
+    {
+      "parameters": {
+        "content": "# 🗂️ DEUTSCHE VIDEO-VERWALTUNG\n## 📊 Google Sheets Integration • Batch-Processing • Automatische Löschung\n### 🔧 Optimiert für deutsche YouTube-Inhalte\n#### ✅ Status: Vollautomatisiertes Verwaltungssystem",
+        "height": 520,
+        "width": 1400,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        2000
+      ],
+      "id": "4166fb74-660f-4144-ba16-4a5413718d4e",
+      "name": "📋 Deutsche Verwaltungs-Banner"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        3120,
+        1600
+      ],
+      "id": "b1424d7c-b717-4ab2-bf6b-695660c76ae1",
+      "name": "💾 Deutsche Wissensbasis-Speicherung",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sEA7DS8KnjOiIRlz",
+          "name": "NH Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3040,
+        1760
+      ],
+      "id": "b6b04623-b3a7-4f5d-8ceb-b42eb4bee8d3",
+      "name": "🧠 Deutsche Speicher-Embeddings",
+      "credentials": {
+        "openAiApi": {
+          "id": "UkkBac0y6p8xHcrW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('🔄 Deutsche Daten-Zusammenführung').item.json.text }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "videoTitle",
+                "value": "={{ $('📥 Video Hinzufügen Portal').first().json['📹 Video Titel'] }}"
+              },
+              {
+                "name": "timestamp",
+                "value": "={{ $('🔄 Deutsche Daten-Zusammenführung').item.json.zeitstempel.startFormatiert }}-{{ $('🔄 Deutsche Daten-Zusammenführung').item.json.zeitstempel.endeFormatiert }}"
+              },
+              {
+                "name": "videoURL",
+                "value": "={{ $('📥 Video Hinzufügen Portal').item.json['🔗 YouTube URL'] }}"
+              },
+              {
+                "name": "kategorie",
+                "value": "Unklassifiziert"
+              },
+              {
+                "name": "sprache",
+                "value": "Deutsch"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        3240,
+        1800
+      ],
+      "id": "746ae32e-89e9-41b8-9f3f-3517c821e0b4",
+      "name": "📄 Deutsche Dokument-Aufbereitung"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "12D8zV6sDK3oNGIPCmJlHkW3QBtetejpQtDAXU-XzKS4",
+          "mode": "list",
+          "cachedResultName": "Deutsche YouTube Videos Hauptliste",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12D8zV6sDK3oNGIPCmJlHkW3QBtetejpQtDAXU-XzKS4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Haupttabelle",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12D8zV6sDK3oNGIPCmJlHkW3QBtetejpQtDAXU-XzKS4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Titel": "={{ $('📥 Video Hinzufügen Portal').item.json['📹 Video Titel'] }}",
+            "URL": "={{ $('📥 Video Hinzufügen Portal').item.json['🔗 YouTube URL'] }}",
+            "Status": "=Verarbeitet",
+            "Transkript": "={{ $('📋 Deutsche Transkript-Kombination').item.json.kombinierterText }}",
+            "Kategorie": "=Automatisch kategorisiert"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Titel",
+              "displayName": "Titel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transkript",
+              "displayName": "Transkript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kategorie",
+              "displayName": "Kategorie",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        3520,
+        1600
+      ],
+      "id": "272a1fd7-a062-40d1-8f0a-0d8cec8ae575",
+      "name": "📊 Deutsche Tabellen-Hinzufügung",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9nrggIIrhCEER4P5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        200,
+        1120
+      ],
+      "id": "dc5a346a-956e-4149-9be5-d5b34509d36f",
+      "name": "🧠 Deutsche Konversations-Speicher"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        920
+      ],
+      "id": "0b9707b5-dc84-40a1-8a87-d52b814945d3",
+      "name": "📱 Deutscher Telegram-Eingang",
+      "webhookId": "9c7f78f0-17b3-481f-b153-5222a9fdb156",
+      "credentials": {
+        "telegramApi": {
+          "id": "9qJXk2uVlu9DKzid",
+          "name": "Nano N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('📱 Deutscher Telegram-Eingang').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1000,
+        800
+      ],
+      "id": "3e75669d-48a7-4261-9180-1f5050049a68",
+      "name": "📤 Deutsche Telegram-Antwort",
+      "webhookId": "bd76eef3-377d-4f31-86a3-6f0e215fd88d",
+      "credentials": {
+        "telegramApi": {
+          "id": "9qJXk2uVlu9DKzid",
+          "name": "Nano N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        40,
+        1160
+      ],
+      "id": "c6092adb-836e-407f-9fda-274a34c047af",
+      "name": "🚀 Deutscher Premium-LLM",
+      "credentials": {
+        "openRouterApi": {
+          "id": "kjpcuppgDdDLC18x",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "🚀 Deutscher KI Experte": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🎯 Intelligenter Recherche Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Deutsche Embeddings Engine": {
+      "ai_embedding": [
+        [
+          {
+            "node": "🎯 Spezifische Video-Suche",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Wissens-Abfrage Portal": {
+      "main": [
+        [
+          {
+            "node": "🎯 Intelligenter Recherche Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Spezifische Video-Suche": {
+      "ai_tool": [
+        [
+          {
+            "node": "🎯 Intelligenter Recherche Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Erweiterte Volltext-Suche": {
+      "ai_tool": [
+        [
+          {
+            "node": "🎓 Kategorisierter Wissens-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Deutsche Volltext-Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "🔍 Erweiterte Volltext-Suche",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Intelligentes Reranking": {
+      "ai_reranker": [
+        [
+          {
+            "node": "🔍 Erweiterte Volltext-Suche",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Video Hinzufügen Portal": {
+      "main": [
+        [
+          {
+            "node": "📝 Transkript-Extraktor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Transkript-Extraktor": {
+      "main": [
+        [
+          {
+            "node": "📋 Deutsche Transkript-Kombination",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "⏱️ Deutsche Zeitstempel-Segmente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Deutsche Transkript-Kombination": {
+      "main": [
+        [
+          {
+            "node": "🔄 Deutsche Daten-Zusammenführung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⏱️ Deutsche Zeitstempel-Segmente": {
+      "main": [
+        [
+          {
+            "node": "🔄 Deutsche Daten-Zusammenführung",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "🔄 Deutsche Daten-Zusammenführung": {
+      "main": [
+        [
+          {
+            "node": "💾 Deutsche Wissensbasis-Speicherung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Deutsche Tabellen-Überwachung": {
+      "main": [
+        [
+          {
+            "node": "🗑️ Deutscher Löschung-Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗑️ Deutscher Löschung-Filter": {
+      "main": [
+        [
+          {
+            "node": "🔄 Deutsche Batch-Verarbeitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗑️ Deutsche Video-Entfernung": {
+      "main": [
+        [
+          {
+            "node": "📝 Deutsche Tabellen-Aktualisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Deutsche Tabellen-Aktualisierung": {
+      "main": [
+        [
+          {
+            "node": "🔄 Deutsche Batch-Verarbeitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Deutsche Feld-Bearbeitung": {
+      "main": [
+        [
+          {
+            "node": "🗑️ Deutsche Video-Entfernung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Deutsche Batch-Verarbeitung": {
+      "main": [
+        [],
+        [
+          {
+            "node": "⚙️ Deutsche Feld-Bearbeitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Deutsche Wissensbasis-Speicherung": {
+      "main": [
+        [
+          {
+            "node": "📊 Deutsche Tabellen-Hinzufügung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Deutsche Speicher-Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "💾 Deutsche Wissensbasis-Speicherung",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Deutsche Dokument-Aufbereitung": {
+      "ai_document": [
+        [
+          {
+            "node": "💾 Deutsche Wissensbasis-Speicherung",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Deutsche Konversations-Speicher": {
+      "ai_memory": [
+        [
+          {
+            "node": "🎓 Kategorisierter Wissens-Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📱 Deutscher Telegram-Eingang": {
+      "main": [
+        [
+          {
+            "node": "🎓 Kategorisierter Wissens-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎓 Kategorisierter Wissens-Agent": {
+      "main": [
+        [
+          {
+            "node": "📤 Deutsche Telegram-Antwort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚀 Deutscher Premium-LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🎓 Kategorisierter Wissens-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin"
+  },
+  "versionId": "deutsche-youtube-wissensdatenbank-v2-2024-fixed",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "deutsche-youtube-wissensdatenbank-system-2024-fixed"
+  },
+  "id": "DeutscheYouTubeWissensdatenbankFixed2024",
+  "tags": [
+    {
+      "createdAt": "2024-09-06T12:00:00.000Z",
+      "updatedAt": "2024-09-06T12:00:00.000Z",
+      "id": "deutsche-wissensdatenbank",
+      "name": "Deutsche Wissensdatenbank"
+    },
+    {
+      "createdAt": "2024-09-06T12:00:00.000Z", 
+      "updatedAt": "2024-09-06T12:00:00.000Z",
+      "id": "youtube-rag-system",
+      "name": "YouTube RAG System"
+    },
+    {
+      "createdAt": "2024-09-06T12:00:00.000Z",
+      "updatedAt": "2024-09-06T12:00:00.000Z", 
+      "id": "kategorisierte-suche",
+      "name": "Kategorisierte Suche"
+    }
+  ]
+}
